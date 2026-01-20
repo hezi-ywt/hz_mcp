@@ -12,3 +12,7 @@ build
 *.egg
 .ruff_cache
 opencode.json
+
+# Cloudflare Workers
+.wrangler/
+worker-configuration.d.ts

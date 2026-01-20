@@ -20,6 +20,7 @@ from openai_mcp.client import (
     get_default_image_model,
 )
 from openai_mcp.image_utils import extract_image_from_response, image2base64
+from openai_mcp.r2_storage import upload_image_to_r2, is_r2_configured
 
 
 async def chat(
@@ -137,16 +138,31 @@ async def generate(
                 "model": target_model,
             }
 
-        # temp_dir = "generated_images"
-        # os.makedirs(temp_dir, exist_ok=True)
-        # image_filename = f"image_{uuid.uuid4().hex[:8]}.png"
-        # image_path = os.path.join(temp_dir, image_filename)
-        # image.save(image_path)
-
-        return {
-            "success": True,
-            "image_data": {"path": image2base64(image), "format": "base64"},
-            "model": target_model,
-        }
+        # Upload to R2 if configured, otherwise use base64
+        if is_r2_configured():
+            try:
+                # Upload to R2 and get public URL
+                image_url = upload_image_to_r2(image)
+                return {
+                    "success": True,
+                    "image_data": {"path": image_url, "format": "url"},
+                    "model": target_model,
+                }
+            except Exception as e:
+                # Fallback to base64 if R2 upload fails
+                print(f"R2 upload failed, falling back to base64: {str(e)}")
+                return {
+                    "success": True,
+                    "image_data": {"path": image2base64(image), "format": "base64"},
+                    "model": target_model,
+                    "warning": f"R2 upload failed: {str(e)}"
+                }
+        else:
+            # R2 not configured, use base64
+            return {
+                "success": True,
+                "image_data": {"path": image2base64(image), "format": "base64"},
+                "model": target_model,
+            }
     except Exception as e:
         return {"success": False, "error": str(e), "model": target_model or "unknown"}
