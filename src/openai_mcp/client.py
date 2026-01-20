@@ -17,7 +17,6 @@ def get_sync_client() -> OpenAI:
     """Get or create the synchronous OpenAI client.
 
     The client is configured to use Google AI's OpenAI-compatible endpoint.
-    Custom headers are set instead of using api_key parameter.
     """
     global _sync_client
     if _sync_client is None:
@@ -30,12 +29,9 @@ def get_sync_client() -> OpenAI:
             "https://generativelanguage.googleapis.com/v1beta/openai/",
         )
 
-        # Create custom headers with bearer token
-        headers = {"Authorization": f"Bearer {api_key}"}
-
         _sync_client = OpenAI(
+            api_key=api_key,
             base_url=base_url,
-            default_headers=headers,
         )
     return _sync_client
 
@@ -44,7 +40,6 @@ def get_async_client() -> AsyncOpenAI:
     """Get or create the asynchronous OpenAI client.
 
     The client is configured to use Google AI's OpenAI-compatible endpoint.
-    Custom headers are set instead of using api_key parameter.
     """
     global _async_client
     if _async_client is None:
@@ -57,12 +52,9 @@ def get_async_client() -> AsyncOpenAI:
             "https://generativelanguage.googleapis.com/v1beta/openai/",
         )
 
-        # Create custom headers with bearer token
-        headers = {"Authorization": f"Bearer {api_key}"}
-
         _async_client = AsyncOpenAI(
+            api_key=api_key,
             base_url=base_url,
-            default_headers=headers,
         )
     return _async_client
 

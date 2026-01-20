@@ -23,8 +23,29 @@ from openai_mcp.services import chat, generate
 # 从环境变量获取API密钥
 API_KEY = os.getenv("OPENAI_API_KEY", "")
 
+# 配置认证
+auth = None
+if os.getenv("AUTH_ENABLED", "false").lower() == "true":
+    from fastmcp.server.auth.providers.jwt import StaticTokenVerifier
+    
+    bearer_token = os.getenv("BEARER_TOKEN", "")
+    if bearer_token:
+        auth = StaticTokenVerifier(
+            tokens={
+                bearer_token: {
+                    "client_id": "mcp-client",
+                    "scopes": ["read:data", "write:data"]
+                }
+            }
+        )
+        print(f"✓ Bearer Token 认证已启用")
+    else:
+        print("⚠ AUTH_ENABLED=true 但未设置 BEARER_TOKEN，认证已禁用")
+else:
+    print("ℹ 认证已禁用 (AUTH_ENABLED=false)")
+
 # 创建FastMCP服务器实例
-mcp = FastMCP("OpenAI MCP Server")
+mcp = FastMCP("OpenAI MCP Server", auth=auth)
 
 
 @mcp.tool()
@@ -100,7 +121,7 @@ def main():
     port = int(os.getenv("PORT", "8000"))
     transport = os.getenv("TRANSPORT", "http")
 
-    mcp.run(transport=transport, port=port)
+    mcp.run(transport=transport, port=port, host = "0.0.0.0")
 
 
 if __name__ == "__main__":
