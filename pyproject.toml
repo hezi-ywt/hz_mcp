@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "openai-mcp"
+version = "0.1.0"
+description = "MCP server with OpenAI chat and image generation capabilities"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=0.1.0",
+    "openai>=1.0.0",
+    "python-dotenv>=1.0.0",
+    "pillow>=10.0.0",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+openai-mcp = "openai_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/openai_mcp"]
